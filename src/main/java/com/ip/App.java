@@ -1,17 +1,20 @@
 package com.ip;
 
 import com.ip.configs.Config;
+import com.ip.configs.LogConfig;
 import com.ip.model.PingResult;
 import com.ip.services.IcmpPing;
 import com.ip.services.TcpPing;
 import com.ip.services.TraceRouter;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 
 public class App {
@@ -19,7 +22,11 @@ public class App {
 
     public static final Map<String, PingResult> results = new ConcurrentHashMap<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        LogConfig.setupLogging(); // Initialize logging
+        Logger logger = Logger.getLogger(App.class.getName());
+        logger.info("Application started.");
+
 
         int delay = Config.getIcmpDelayProperty();
         int count = Config.getIcmpCountProperty();
@@ -43,10 +50,13 @@ public class App {
         ScheduledExecutorService schedulerTrace = Executors.newScheduledThreadPool(HOSTS.size());
 
         for (String host : HOSTS) {
-            schedulerIcmp.scheduleAtFixedRate(() -> IcmpPing.icmpPing(count, host),
-                                              0,
-                                              delay,
-                                              TimeUnit.MILLISECONDS);
+            schedulerIcmp.scheduleAtFixedRate(() -> {
+                try {
+                    IcmpPing.icmpPing(count, host);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, 0, delay, TimeUnit.MILLISECONDS);
         }
         for (String host : HOSTS) {
             schedulerTcp.scheduleAtFixedRate(() -> TcpPing.tcpPing(host, timeoutTcp),
@@ -55,10 +65,10 @@ public class App {
                                              TimeUnit.MILLISECONDS);
         }
         for (String host : HOSTS) {
-            schedulerTrace.scheduleAtFixedRate(() -> TraceRouter.traceRoute(host , traceMax),
-                                             0,
+            schedulerTrace.scheduleAtFixedRate(() -> TraceRouter.traceRoute(host, traceMax),
+                                               0,
                                                delayTrace,
-                                             TimeUnit.MILLISECONDS);
+                                               TimeUnit.MILLISECONDS);
         }
 
 
@@ -85,21 +95,20 @@ public class App {
                 }
             }
         }).start();*/
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("\nShutting down...");
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(() -> {
+                    System.out.println("\nShutting down...");
 
-            // Print the results map
-            System.out.println("Results:");
-            App.results.forEach((host, result) ->
-                                        System.out.printf("Host: %s, Result: %s%n", host, result)
-            );
+                    // Print the results map
+                    System.out.println("Results:");
+                    App.results.forEach((host, result) -> System.out.printf("Host: %s, Result: %s%n", host, result));
 
-            // Shutdown executors immediately
-            schedulerIcmp.shutdownNow();
-            schedulerTcp.shutdownNow();
-            schedulerTrace.shutdownNow();
+                    // Shutdown executors immediately
+                    schedulerIcmp.shutdownNow();
+                    schedulerTcp.shutdownNow();
+                    schedulerTrace.shutdownNow();
 
-            System.out.println("Shutdown complete.");
-        }));
+                    System.out.println("Shutdown complete.");
+                }));
     }
 }

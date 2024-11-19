@@ -17,12 +17,12 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 @Builder
 public class TraceRouter {
-    private static final Logger logger = Logger.getLogger(TraceRouter.class.getName());
+    static Logger logger = Logger.getLogger(TraceRouter.class.getName());
 
     public static void traceRoute(String host, int maxHops) {
         try {
             logger.log(Level.INFO, "Traceroute host: {0}", new Object[]{host});
-            ProcessBuilder traceCmd = new ProcessBuilder(getOSCommand() , "-m" ,String.valueOf(maxHops), host);
+            ProcessBuilder traceCmd = new ProcessBuilder(getOSCommand(), "-m", String.valueOf(maxHops), host);
             Process process = traceCmd.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder output = new StringBuilder();
@@ -30,7 +30,7 @@ public class TraceRouter {
             while ((line = reader.readLine()) != null) {
                 output.append(line)
                         .append(System.lineSeparator());
-                logger.log(Level.FINE, "Traceroute for host {0}. \n {1}", new Object[]{host, output.toString()});
+                logger.log(Level.INFO, "Traceroute for host {0}. \n {1}", new Object[]{host, output.toString()});
             }
 
             int exitCode = process.waitFor();
@@ -43,7 +43,8 @@ public class TraceRouter {
                     .host(host)
                     .timestamp(LocalDateTime.now())
                     .build();
-            App.results.put(host + "-TRACE",result);
+            App.results.put(host + "-TRACE", result);
+            logger.log(Level.INFO, "Result for host {0}. Result: {1}", new Object[]{host, App.results});
         } catch (Exception e) {
             Reporter.report(host, App.results);
             logger.log(Level.SEVERE, "Error trace routing to host: " + host, e);

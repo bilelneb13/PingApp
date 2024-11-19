@@ -1,5 +1,7 @@
 package com.ip.model;
 
+import com.ip.configs.ReportLogConfig;
+import com.ip.services.IcmpPing;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -16,23 +18,9 @@ import java.util.logging.*;
 @RequiredArgsConstructor
 @Builder
 public class Reporter {
-    private static final Logger logger = Logger.getLogger(Reporter.class.getName());
+    static Logger logger = Logger.getLogger(Reporter.class.getName());
     private static final String REPORT_URL = "http://example.com/report"; // Load from config
-    private static final String LOG_FILE = "ping-report.log"; // Load from config
 
-    static {
-        try {
-            LogManager.getLogManager()
-                    .reset();
-            FileHandler fileHandler = new FileHandler(LOG_FILE, true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            fileHandler.setLevel(Level.WARNING);
-            logger.addHandler(fileHandler);
-            logger.setLevel(Level.WARNING);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void report(String host, Map map) {
         String payload = String.format("{\"host\":\"%s\",\"icmp_ping\":\"%s\",\"tcp_ping\":\"%s\",\"trace\":\"%s\"}",
@@ -51,7 +39,7 @@ public class Reporter {
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(payload.getBytes(StandardCharsets.UTF_8));
             }
-            logger.warning("report to  " + REPORT_URL + "with payload " +  payload);
+            logger.log(Level.WARNING,"Reporting for host: " + host + ", Payload: " + payload);
         } catch (Exception e) {
             logger.warning("Error reporting for host " + host + ": " + e.getMessage());
         }

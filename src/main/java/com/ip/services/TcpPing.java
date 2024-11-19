@@ -1,10 +1,11 @@
 package com.ip.services;
 
 import com.ip.App;
-import com.ip.model.IcmpPingResult;
 import com.ip.model.Reporter;
 import com.ip.model.TcpPingResult;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -17,8 +18,7 @@ import java.util.logging.Logger;
 @Builder
 public class TcpPing {
     private static final int MAX_RESPONSE_TIME = 1000; // Load from config
-    private static final Logger logger = Logger.getLogger(TcpPing.class.getName());
-
+    static Logger logger = Logger.getLogger(TcpPing.class.getName());
     public static void tcpPing(String host, int timeout) {
         try {
             logger.log(Level.INFO, "Pinging TCP host: {0}", new Object[]{host});
@@ -40,9 +40,10 @@ public class TcpPing {
                     .timestamp(LocalDateTime.now())
                     .build();
             // Log the TCP ping result
-            logger.log(Level.FINE, "TCP Ping successful for host {0}. Response code: {1}, Response time: {2} ms",
+            logger.log(Level.INFO, "TCP Ping successful for host {0}. Response code: {1}, Response time: {2} ms",
                        new Object[]{host, responseCode, responseTime});
-            App.results.put(host + "-TCP",result);
+            App.results.put(host + "-TCP", result);
+            logger.log(Level.INFO, "Result for host {0}. Result: {1}", new Object[]{host, App.results});
             if (responseTime > MAX_RESPONSE_TIME) {
                 Reporter.report(host, App.results);
                 logger.log(Level.WARNING, "TCP Ping response time exceeded for host {0}. Response time: {1} ms",
