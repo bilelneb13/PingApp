@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TraceResult extends PingResult{
+public class TraceResult implements PingResult {
     String host;
     String result;
     LocalDateTime timestamp;

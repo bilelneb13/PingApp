@@ -1,4 +1,4 @@
 package com.ip.model;
 
-public abstract class PingResult {
+public interface  PingResult {
 }

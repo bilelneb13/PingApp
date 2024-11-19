@@ -1,11 +1,20 @@
 package com.ip.model;
 
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.logging.*;
 
+
+@Data
+@RequiredArgsConstructor
+@Builder
 public class Reporter {
     private static final Logger logger = Logger.getLogger(Reporter.class.getName());
     private static final String REPORT_URL = "http://example.com/report"; // Load from config
@@ -25,12 +34,12 @@ public class Reporter {
         }
     }
 
-    public static void report(String host, String icmpPing, String tcpPing, String trace) {
+    public static void report(String host, Map map) {
         String payload = String.format("{\"host\":\"%s\",\"icmp_ping\":\"%s\",\"tcp_ping\":\"%s\",\"trace\":\"%s\"}",
                                        host,
-                                       icmpPing,
-                                       tcpPing,
-                                       trace);
+                                       map.containsKey(host + "-ICMP") ? map.get(host + "-ICMP") : "N/A",
+                                       map.containsKey(host + "-TCP") ? map.get(host + "-TCP") : "N/A",
+                                       map.containsKey(host + "-TRACE") ? map.get(host + "-TRACE") : "N/A");
 
         try {
             URL url = new URL(REPORT_URL);
@@ -42,13 +51,7 @@ public class Reporter {
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(payload.getBytes(StandardCharsets.UTF_8));
             }
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-                logger.warning("Failed to report for host " + host + ". HTTP Response Code: " + responseCode);
-            } else {
-                logger.warning("Report successfully sent for host " + host);
-            }
+            logger.warning("report to  " + REPORT_URL + "with payload " +  payload);
         } catch (Exception e) {
             logger.warning("Error reporting for host " + host + ": " + e.getMessage());
         }
