@@ -12,6 +12,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>23</maven.compiler.release>
+    <mainClass>com.ip.App</mainClass>
   </properties>
 
   <dependencyManagement>
@@ -83,6 +84,19 @@
               </path>
             </annotationProcessorPaths>
             <compilerArgs>--enable-preview</compilerArgs>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifest>
+                <mainClass>com.ip.App</mainClass>
+              </manifest>
+            </archive>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
           </configuration>
         </plugin>
       </plugins>
