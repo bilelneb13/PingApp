@@ -10,19 +10,27 @@ import lombok.RequiredArgsConstructor;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Data
-@RequiredArgsConstructor
-@Builder
 public class TraceRouter {
     static Logger logger = Logger.getLogger(TraceRouter.class.getName());
+    private final Supplier<ProcessBuilder> processBuilderSupplier;
 
-    public static void traceRoute(String host, int maxHops) {
+    public TraceRouter() {
+        this.processBuilderSupplier = ProcessBuilder::new; // Use default behavior
+    }
+
+    // Constructor for testing or custom suppliers
+    public TraceRouter(Supplier<ProcessBuilder> processBuilderSupplier) {
+        this.processBuilderSupplier = processBuilderSupplier;
+    }
+    public void traceRoute(String host, int maxHops) {
         try {
             logger.log(Level.INFO, "Traceroute host: {0}", new Object[]{host});
-            ProcessBuilder traceCmd = new ProcessBuilder(getOSCommand(), "-m", String.valueOf(maxHops), host);
+            ProcessBuilder traceCmd = processBuilderSupplier.get().command(getOSCommand(), "-m", String.valueOf(maxHops), host);
             Process process = traceCmd.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder output = new StringBuilder();
@@ -52,7 +60,7 @@ public class TraceRouter {
         }
     }
 
-    private static String getOSCommand() {
+    public String getOSCommand() {
         String os = System.getProperty("os.name")
                 .toLowerCase();
         if (os.contains("win")) {

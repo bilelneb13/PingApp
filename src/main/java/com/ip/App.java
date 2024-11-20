@@ -27,7 +27,9 @@ public class App {
         Logger logger = Logger.getLogger(App.class.getName());
         logger.info("Application started.");
 
-
+        TcpPing tcpPing = new TcpPing();
+        IcmpPing icmpPing = new IcmpPing();
+        TraceRouter traceRouter = new TraceRouter();
         int delay = Config.getIcmpDelayProperty();
         int count = Config.getIcmpCountProperty();
         int timeoutTcp = Config.getTcpTimeout();
@@ -50,22 +52,16 @@ public class App {
         ScheduledExecutorService schedulerTrace = Executors.newScheduledThreadPool(HOSTS.size());
 
         for (String host : HOSTS) {
-            schedulerIcmp.scheduleAtFixedRate(() -> {
-                try {
-                    IcmpPing.icmpPing(count, host);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }, 0, delay, TimeUnit.MILLISECONDS);
+            schedulerIcmp.scheduleAtFixedRate(() -> icmpPing.icmpPing(count, host), 0, delay, TimeUnit.MILLISECONDS);
         }
         for (String host : HOSTS) {
-            schedulerTcp.scheduleAtFixedRate(() -> TcpPing.tcpPing(host, timeoutTcp),
+            schedulerTcp.scheduleAtFixedRate(() -> tcpPing.tcpPing(host, timeoutTcp),
                                              0,
                                              delayTcp,
                                              TimeUnit.MILLISECONDS);
         }
         for (String host : HOSTS) {
-            schedulerTrace.scheduleAtFixedRate(() -> TraceRouter.traceRoute(host, traceMax),
+            schedulerTrace.scheduleAtFixedRate(() -> traceRouter.traceRoute(host, traceMax),
                                                0,
                                                delayTrace,
                                                TimeUnit.MILLISECONDS);

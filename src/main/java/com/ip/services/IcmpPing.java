@@ -1,32 +1,39 @@
 package com.ip.services;
 
 import com.ip.App;
-import com.ip.configs.LogConfig;
 import com.ip.model.IcmpPingResult;
 import com.ip.model.Reporter;
-import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Data
-@RequiredArgsConstructor
-@Builder
+
 public class IcmpPing {
 
     static Logger logger = Logger.getLogger(IcmpPing.class.getName());
 
-    public static void icmpPing(int count, String host) throws IOException {
-        LogConfig.setupLogging();
+    private final Supplier<ProcessBuilder> processBuilderSupplier;
+
+
+    public IcmpPing() {
+        this.processBuilderSupplier = ProcessBuilder::new; // Use default behavior
+    }
+
+    // Constructor for testing or custom suppliers
+    public IcmpPing(Supplier<ProcessBuilder> processBuilderSupplier) {
+        this.processBuilderSupplier = processBuilderSupplier;
+    }
+
+    public void icmpPing(int count, String host) {
         try {
             logger.log(Level.INFO, "Pinging host: {0} with {1} attempts.", new Object[]{host, count});
-            ProcessBuilder pingCmd = new ProcessBuilder("ping", getOSCommand(), String.valueOf(count), host);
+            ProcessBuilder pingCmd = processBuilderSupplier.get().command("ping", getOSCommand(), String.valueOf(count), host);
             Process process = pingCmd.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
@@ -63,7 +70,7 @@ public class IcmpPing {
         }
     }
 
-    private static String getOSCommand() {
+    public String getOSCommand() {
         String os = System.getProperty("os.name")
                 .toLowerCase();
         String command = "";
