@@ -41,19 +41,22 @@ public class TcpPing {
                     .responseTime(responseTime)
                     .timestamp(LocalDateTime.now())
                     .build();
-            // Log the TCP ping result
+
             logger.log(Level.INFO,
                        "TCP Ping successful for host {0}. Response code: {1}, Response time: {2} ms",
                        new Object[]{host, responseCode, responseTime});
+            // log result
             App.results.put(host + "-TCP", result);
             logger.log(Level.INFO, "Result for host {0}. Result: {1}", new Object[]{host, App.results});
             if (responseTime > MAX_RESPONSE_TIME) {
+                // report error
                 Reporter.report(host, App.results);
                 logger.log(Level.WARNING,
                            "TCP Ping response time exceeded for host {0}. Response time: {1} ms",
                            new Object[]{host, responseTime});
             }
         } catch (Exception e) {
+            // report error
             Reporter.report(host, App.results);
             logger.log(Level.SEVERE, "Error during TCP ping to host: " + host, e);
             System.out.println("Error during TCP ping to host: " + host + ": " + e.getMessage()); // Real-time output to console

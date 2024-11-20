@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Data
-
 public class IcmpPing {
 
     static Logger logger = Logger.getLogger(IcmpPing.class.getName());
@@ -25,7 +24,6 @@ public class IcmpPing {
         this.processBuilderSupplier = ProcessBuilder::new; // Use default behavior
     }
 
-    // Constructor for testing or custom suppliers
     public IcmpPing(Supplier<ProcessBuilder> processBuilderSupplier) {
         this.processBuilderSupplier = processBuilderSupplier;
     }
@@ -75,9 +73,9 @@ public class IcmpPing {
                 .toLowerCase();
         String command = "";
         if (os.contains("win")) {
-            return "-n";  // Windows uses '-n' for number of pings
+            return "-n";
         } else {
-            return "-c";  // Unix-based systems use '-c' for number of pings
+            return "-c";
         }
     }
 }

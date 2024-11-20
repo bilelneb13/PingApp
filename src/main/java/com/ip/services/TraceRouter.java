@@ -23,7 +23,6 @@ public class TraceRouter {
         this.processBuilderSupplier = ProcessBuilder::new; // Use default behavior
     }
 
-    // Constructor for testing or custom suppliers
     public TraceRouter(Supplier<ProcessBuilder> processBuilderSupplier) {
         this.processBuilderSupplier = processBuilderSupplier;
     }
@@ -43,6 +42,7 @@ public class TraceRouter {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
+                // report error
                 Reporter.report(host, App.results);
             }
             logger.log(Level.INFO, "Traceroute for host {0}. {1}", new Object[]{host, output.toString()});
@@ -51,6 +51,7 @@ public class TraceRouter {
                     .host(host)
                     .timestamp(LocalDateTime.now())
                     .build();
+            // log result
             App.results.put(host + "-TRACE", result);
             logger.log(Level.INFO, "Result for host {0}. Result: {1}", new Object[]{host, App.results});
         } catch (Exception e) {

@@ -36,17 +36,7 @@ public class App {
         int delayTcp = Config.getTcpDelay();
         int delayTrace = Config.getTraceDelay();
         int traceMax = Config.getMaxHops();
-/*        // Schedule Icmp Pings
-        new Thread(() -> {
-            while (true) {
-                HOSTS.forEach(host -> new Thread(() -> IcmpPing.icmpPing(count,  host)).start());
-                try {
-                    Thread.sleep(10000); // Load from config
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
+
         ScheduledExecutorService schedulerIcmp = Executors.newScheduledThreadPool(HOSTS.size());
         ScheduledExecutorService schedulerTcp = Executors.newScheduledThreadPool(HOSTS.size());
         ScheduledExecutorService schedulerTrace = Executors.newScheduledThreadPool(HOSTS.size());
@@ -67,30 +57,6 @@ public class App {
                                                TimeUnit.MILLISECONDS);
         }
 
-
-/*        // Schedule TCP/IP Pings
-        new Thread(() -> {
-            while (true) {
-                HOSTS.forEach(host -> new Thread(() -> TcpPinger.tcpPing("http://" + host)).start());
-                try {
-                    Thread.sleep(10000); // Load from config
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
-
-        /*// Schedule Trace Routes
-        new Thread(() -> {
-            while (true) {
-                HOSTS.forEach(host -> new Thread(() -> TraceRouter.traceRoute(host)).start());
-                try {
-                    Thread.sleep(15000); // Load from config
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
         Runtime.getRuntime()
                 .addShutdownHook(new Thread(() -> {
                     System.out.println("\nShutting down...");

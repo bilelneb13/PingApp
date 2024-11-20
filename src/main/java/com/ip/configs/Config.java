@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Config {
     private static final Properties PROPERTIES = loadConfig();
@@ -18,18 +20,22 @@ public class Config {
     private static final String DEFAULT_HOSTS = "jasmin.com,oranum.com";
     private static final String DEFAULT_DELAY = "5000";
     private static final String DEFAULT_COUNT = "5";
+    static Logger logger = Logger.getLogger(Config.class.getName());
 
     public static Properties loadConfig() {
         Properties properties = new Properties();
         try (InputStream inputStream = Config.class.getClassLoader()
                 .getResourceAsStream("config.properties")) {
             if (inputStream == null) {
-                System.err.println("Sorry, unable to find config.properties");
+                logger.info("Sorry, unable to find config.properties");
                 return properties; // Return empty properties if file is not found
             }
             properties.load(inputStream);
         } catch (IOException e) {
-            e.printStackTrace(); // Handle error appropriately
+            logger.log(Level.SEVERE,
+                       e.getCause()
+                               .getMessage(),
+                       e);
         }
         return properties;
     }

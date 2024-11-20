@@ -17,7 +17,7 @@ import java.util.logging.*;
 @Builder
 public class Reporter {
     static Logger logger = Logger.getLogger(Reporter.class.getName());
-    private static final String REPORT_URL = "http://example.com/report"; // Load from config
+    private static final String REPORT_URL = "http://example.com/report";
 
 
     public static void report(String host, Map map) {
