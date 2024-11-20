@@ -1,7 +1,5 @@
 package com.ip.model;
 
-import com.ip.configs.ReportLogConfig;
-import com.ip.services.IcmpPing;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
